@@ -1,3 +1,7 @@
+# Create data folder export folder
+dir.create("outputs/NMDS", showWarnings=F) 
+save_path <- paste0("outputs/NMDS/")
+
 # Run NMDS analyses + Permanova to test effect of clusters + 
 # Monte-Carlo to test the effect of environment variables
 
@@ -25,6 +29,8 @@ spiders.sp.fit <- envfit(nmds_spiders,
 
 source("./utils/function_plot_nmds.R")
 
+NOMpng="nmds_spiders.png"
+png(file = paste0(save_path, NOMpng), width = 700, height = 700)
 plot.nmds.spiders.env <- plot.nmds(nmds_spiders, 
                                spiders.sp.fit, 
                                pval.sp = 0.05,
@@ -32,6 +38,9 @@ plot.nmds.spiders.env <- plot.nmds(nmds_spiders,
                                pval.env = 0.05,
                                env.var = "Cluster",
                                ssp.fit = FALSE) 
+plot(plot.nmds.spiders.env)
+dev.off()
+
 
 # test effect of predictors on beta-diversity by PERMANOVA
 adonis2(sqrt(spiders_sums_indval) ~ spiders_env$Cluster, permutations = 9999)

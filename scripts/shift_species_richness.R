@@ -1,3 +1,8 @@
+#  Create "richness_comparison" folder and set exporting directory 
+dir.create("outputs/richness_comparison",showWarnings=F) 
+save_path <- paste0("outputs/richness_comparison/")
+
+
 # Test if shift in community-wide functional shifts are due to species 
 # replacement or to a decrease of species with particular trait values
 
@@ -37,12 +42,12 @@ spiders_Tmean_richness <-
     select(-c("NA")) %>% 
     rename(all_of(new_names)) %>% 
     na.omit() %>% 
-    mutate(class_tot = 1) %>% #### 
+    mutate(class_tot = 1) %>%
     group_by(Code_site) %>% 
     summarise(Ric_low_sp = sum(class_low),
               Ric_mid_sp = sum(class_mid),
               Ric_high_sp = sum(class_high),
-              Ric_tot_sp = sum(class_tot)) %>% ####
+              Ric_tot_sp = sum(class_tot)) %>%
     filter(!Code_site == "Lm_01",
            !Code_site == "Hh_01",
            !Code_site == "Lh_03") %>% 
@@ -57,8 +62,7 @@ environment_scaled_clus <- column_to_rownames(environment_scaled_clus, var = "Co
 cutoff_size <- bin(spiders_traits_fc$Body, nbins = 3, method = "content")
 
 Size_spiders_class <- spiders_traits_fc %>% 
-    rownames_to_column(var="Species") %>% 
-    select(Species) 
+    select(Species_full) 
 Size_spiders_class <- data.frame(Size_spiders_class, cutoff_size)
 
 names(Size_spiders_class) <- c("Species_full", 
@@ -83,12 +87,12 @@ spiders_size_richness <-
     select(-c("NA")) %>% 
     rename(all_of(new_names)) %>% 
     na.omit() %>% 
-    mutate(class_tot = 1) %>% #### 
+    mutate(class_tot = 1) %>%
     group_by(Code_site) %>% 
     summarise(Ric_small_sp = sum(class_small),
               Ric_mid_sp = sum(class_mid),
               Ric_large_sp = sum(class_large),
-              Ric_tot_sp = sum(class_tot)) %>% ####
+              Ric_tot_sp = sum(class_tot)) %>%
     filter(!Code_site == "Lm_01",
            !Code_site == "Hh_01",
            !Code_site == "Lh_03") %>% 
@@ -128,20 +132,8 @@ for (i in names(spiders_Tmean_richness)[c(2:4)])
                                             xlab = "cluster")
 }
 
-NOMpng=paste0("outputs/richness_comparison/richness_Tmean_boxplot.png")
-png(file = NOMpng, width = 740, height = 300) 
-ggarrange(richness_Tmean_boxplot$Ric_low_sp,
-          richness_Tmean_boxplot$Ric_mid_sp,
-          richness_Tmean_boxplot$Ric_high_sp,
-          labels = c("a)", "b)", "c)"),
-          ncol = 3, nrow = 1)
-dev.off()
+# Plot differences in richness among clusters in a single plot
 
-# Plot differences in richness among clusters in a single plot and save
-# width=570, height=400
-
-NOMpng=paste0("outputs/richness_comparison/richness_Tmean_boxplot_2.png")
-png(file = NOMpng, width = 740, height = 300) 
 ggplot(melt(spiders_Tmean_richness[,c(1,2,3,4,10)], 
             id = "clus"), 
        aes(x = variable, 
@@ -150,8 +142,6 @@ ggplot(melt(spiders_Tmean_richness[,c(1,2,3,4,10)],
     geom_boxplot() + 
     theme_classic() +
     scale_fill_manual(values=c("lightgrey", "grey55", "grey35"))
-dev.off()
-
 
 #  Averaged low-temp species richness by cluster 
 spiders_Tmean_richness %>% 
@@ -229,27 +219,6 @@ for (i in names(spiders_size_richness)[c(2:4)])
                                        xlab = "cluster")
 }
 
-NOMpng=paste0("outputs/richness_comparison/richness_size_boxplot.png")
-png(file = NOMpng, width = 740, height = 300) 
-ggarrange(richness_size_boxplot$Ric_small_sp,
-          richness_size_boxplot$Ric_mid_sp,
-          richness_size_boxplot$Ric_large_sp,
-          labels = c("a)", "b)", "c)"),
-          ncol = 3, nrow = 1)
-dev.off()
-
-# Plot differences in richness among clusters in a single plot and save
-# width=570, height=400
-ggplot(melt(spiders_size_richness[,c(1,2,3,4,10)], 
-            id = "clus"), 
-       aes(x = variable, 
-           y = value, 
-           fill = clus)) +
-    geom_boxplot() + 
-    theme_classic() +
-    scale_fill_manual(values=c("lightgrey", "grey55", "grey35"))
-    
-
 #  Averaged small species richness by cluster 
 spiders_size_richness %>% 
     group_by(clus) %>% 
@@ -307,6 +276,8 @@ spiders_Tmean_richness <- spiders_Tmean_richness %>%
 
 # Update plot changes in absolute species richness 
 # width=1000, height=400
+NOMpng=paste0("Absolute_richness_changes.png")
+png(file = paste0(save_path, NOMpng), width = 740, height = 300) 
 plot_changes_species_richness <- ggplot(melt(spiders_richness_full[,c(11,2,3,4,12,13,14,10)], 
             id = "clus.x"), 
        aes(x = variable, 
@@ -315,6 +286,8 @@ plot_changes_species_richness <- ggplot(melt(spiders_richness_full[,c(11,2,3,4,1
     geom_boxplot() + 
     theme_classic() +
     scale_fill_manual(values=c("#137C8B", "#B8CBD0", "#595959"))
+print(plot_changes_species_richness)
+dev.off()
 
 # Update plot changes in relative species richness 
 # width=1000, height=400
@@ -324,6 +297,8 @@ spiders_richness_full_percent <- read.csv("data/spiders_richness_full_percent.cs
                                           row.names = 1)
 spiders_richness_full_percent$clus.x <- as.factor(spiders_richness_full_percent$clus.x)
 
+NOMpng=paste0("Relative_richness_changes.png")
+png(file = paste0(save_path, NOMpng), width = 740, height = 300) 
 plot_changes_species_richness_percent <- ggplot(melt(spiders_richness_full_percent,
                                                      id = "clus.x"), 
                                                 aes(x = variable, 
@@ -332,6 +307,8 @@ plot_changes_species_richness_percent <- ggplot(melt(spiders_richness_full_perce
     geom_boxplot() + 
     theme_classic() +
     scale_fill_manual(values=c("#137C8B", "#B8CBD0", "#595959"))
+print(plot_changes_species_richness_percent)
+dev.off()
 
 # Test differences in relative species richness in functional classes among clusters
 

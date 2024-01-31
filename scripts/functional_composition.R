@@ -1,8 +1,10 @@
-# Create trait community-mean data set
+# Create data folder export folder
+dir.create("outputs/functional_comp", showWarnings=F) 
+save_path <- paste0("outputs/functional_comp/")
 
 # Compute Community Mean indices (non-weighted)
 spiders_ab.traits <- spiders %>% 
-    full_join(spiders_traits.fc, by = "Species_full")
+    full_join(spiders_traits_fc, by = "Species_full")
 
 spiders_traits.cm <-   
     spiders_ab.traits %>%  
@@ -72,7 +74,7 @@ for (i in names(spiders_traits.cm)) {
     
 }
 
-write.csv(glm.cm.df, "outputs/functional_comp/glm_cm_df.csv")
+write.csv(glm.cm.df, paste0(save_path, "glm_cm_df.csv"))
 
 # Test differences in CM among clusters and save results in lists 
 traits_aov_res <- list()
@@ -124,5 +126,16 @@ for (i in names(spiders_traits.cm.env)[c(1:14)])
                                      xlab = "cluster")
 }
 
+# Export plot community-averaged body size
+NOMpng="boxplot_body_size.png"
+png(file = paste0(save_path, NOMpng), width = 500, height = 500)
+traits_boxplot$Body
+dev.off()
+
+# Export plot community-averaged temperature affinity
+NOMpng="boxplot_Temp_affinity.png"
+png(file = paste0(save_path, NOMpng), width = 1000, height = 500)
 traits_boxplot$Tmean_mean + traits_boxplot$Tmin_mean + traits_boxplot$Tmax_mean +
     plot_layout(guides = 'collect')
+dev.off()
+

@@ -1,6 +1,9 @@
 # Load required packages
 source("utils/load_packages.R")
 
+# Create "outputs" folder
+dir.create("outputs", showWarnings=F) 
+
 # Load environment data
 environment <- read.csv(file.path("data", "environment.csv"), 
                         header = TRUE,
@@ -23,8 +26,8 @@ spiders <- read.csv(file.path("data", "spiders.csv"),
   spiders_traits$Ballo <- as.factor(spiders_traits$Ballo)
 }
 
-# Load thermal index data
-Tpref_spiders <- source("community_temperature_index_spiders.R")
+# # Load thermal index data
+# Tpref_spiders <- source("community_temperature_index_spiders.R")
 
 # Pool abundance data into a table of one sum per site and remove sampling sites
 # excluded during the sampling site procedure 
@@ -86,18 +89,20 @@ spiders_sums <- spiders %>%
   Tpref_spiders <- rownames_to_column(Tpref_spiders, var = "species")
   
   spiders_traits_fc <- as.data.frame(t(spiders_sums_fc)) %>% 
-        rownames_to_column(var="species") %>%
-        left_join(spiders_traits, by = "species") %>%
-        left_join(Tpref_spiders, by = "species") %>%
-        column_to_rownames(var = "species") %>% 
-        dplyr::select(Body, Hunt, Ballo, Tpref_mean, Tpref_max, Tpref_min)
+    rownames_to_column(var="species") %>%
+    left_join(spiders_traits, by = "species") %>%
+    left_join(Tpref_spiders, by = "species") %>%
+    column_to_rownames(var = "species") %>% 
+    dplyr::select(Body, Hunt, Ballo, Tpref_mean, Tpref_max, Tpref_min) %>% 
+    rownames_to_column(var = "Species_full") 
+  
   
     spiders_traits <- column_to_rownames(spiders_traits, var = "species")
     Tpref_spiders <- column_to_rownames(Tpref_spiders, var = "species")
 }
 
 # Run Hierarchical clustering analysis based on environment variables
-source("scripts/HCPC_Spiders.R")
+source("scripts/HCA_environment.R")
 
 # Run NMDS analyses + Permanova to test effect of clusters + 
 # Monte-Carlo to test the effect of environment variables

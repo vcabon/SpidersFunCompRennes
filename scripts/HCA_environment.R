@@ -1,11 +1,12 @@
 # Run Hierarchical clustering analysis based on environment variables
 
+#  Create HCA folder and set exporting directory 
+dir.create("outputs/HCA",showWarnings=F) 
+save_path <- paste0("outputs/HCA/")
+
 # Define global variables
 M <- list("manhattan","euclidian") # metrics distance
 m <- 2 #choose the correct metrics distance
-
-# Set export directory 
-save_path <- paste0("outputs/HCA/")
 
 # Build PCA
 res_pca <- PCA(environment,
